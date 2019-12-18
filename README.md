@@ -21,6 +21,11 @@ So you want to use the library?
    `S.initialize();`
 1. Now you're ready to Sprinkle out some magical assembly!
 
+Example
+-------
+Vorhees is an object file -to- JSON dumper.  Give it a whirl!
+`build/vorhees/vorhees <object file>`
+
 Building
 --------
 1. Create a build directory. `mkdir libsprinkles/build`
