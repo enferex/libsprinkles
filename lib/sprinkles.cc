@@ -5,6 +5,7 @@
 #include <llvm/MC/MCContext.h>
 #include <llvm/MC/MCDisassembler/MCDisassembler.h>
 #include <llvm/MC/MCObjectFileInfo.h>
+#include <llvm/MC/MCTargetOptions.h>
 #include <llvm/Object/ObjectFile.h>
 #include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/TargetSelect.h>
@@ -76,8 +77,8 @@ Error Sprinkles::parseObject() {
       triple.getTriple(), "", _objFile->getFeatures().getString()));
   const std::string tt = triple.getTriple();
   _rinfo = std::unique_ptr<const MCRegisterInfo>(target->createMCRegInfo(tt));
-  _ainfo =
-      std::unique_ptr<const MCAsmInfo>(target->createMCAsmInfo(*_rinfo, tt));
+  _ainfo = std::unique_ptr<const MCAsmInfo>(
+      target->createMCAsmInfo(*_rinfo, tt, MCTargetOptions()));
   _iinfo = std::unique_ptr<const MCInstrInfo>(target->createMCInstrInfo());
   _printer = std::unique_ptr<MCInstPrinter>(target->createMCInstPrinter(
       triple, 0, *_ainfo.get(), *_iinfo.get(), *_rinfo.get()));
@@ -101,7 +102,7 @@ Error Sprinkles::parseObject() {
     uint64_t size = 0, offset = 0, nAdded = 0;
     while (offset < maxSize) {
       MCDisassembler::DecodeStatus status = dis->getInstruction(
-          inst, size, bytes.slice(offset), base + offset, nulls(), nulls());
+          inst, size, bytes.slice(offset), base + offset, nulls());
       if (status == MCDisassembler::Success) {
         nAdded++;
         _instructions.push_back(inst);
@@ -126,5 +127,5 @@ Error Sprinkles::parseObject() {
 MCInstPrinter *Sprinkles::getPrinter() const { return _printer.get(); }
 
 void Sprinkles::dump(const MCInst *mi) const {
-  _printer->printInst(mi, outs(), "", *_sti);
+  _printer->printInst(mi, 0, "", *_sti, outs());
 }
