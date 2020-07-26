@@ -20,6 +20,7 @@ using InstList = std::vector<llvm::MCInst>;  // TODO: Make this a list of ptrs
 class Sprinkles final {
   std::string _inputFname;
   std::vector<llvm::MCInst> _instructions;
+  std::vector<llvm::object::SymbolRef> _symbols;
   std::unique_ptr<llvm::object::ObjectFile> _objFile;
   std::unique_ptr<llvm::MemoryBuffer> _objBuffer;
   std::unique_ptr<llvm::MCInstPrinter> _printer;

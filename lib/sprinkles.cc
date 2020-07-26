@@ -121,6 +121,11 @@ Error Sprinkles::parseObject() {
       _sectionToInsns.emplace(std::make_pair(sect.getIndex(), pr));
     }
   }
+
+  // Collect the symbols.
+  auto syms = _objFile->symbols();
+  std::copy(syms.begin(), syms.end(), _symbols.begin());
+
   return Error::success();
 }
 
