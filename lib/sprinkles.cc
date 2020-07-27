@@ -123,8 +123,13 @@ Error Sprinkles::parseObject() {
   }
 
   // Collect the symbols.
-  auto syms = _objFile->symbols();
-  std::copy(syms.begin(), syms.end(), _symbols.begin());
+  for (const object::SymbolRef &sr : _objFile->symbols())
+    _symbols.push_back(sr);
+
+  // Collect the relocations.
+  for (const object::SectionRef &sect : _objFile->dynamic_relocation_sections())
+    for (const object::RelocationRef &rr : sect.relocations())
+      _relocations.push_back(rr);
 
   return Error::success();
 }
