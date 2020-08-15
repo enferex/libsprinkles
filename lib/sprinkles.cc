@@ -32,6 +32,14 @@ const std::vector<MCInst> &Sprinkles::getInstructions() const {
   return _instructions;
 }
 
+const std::vector<object::SymbolRef> &Sprinkles::getSymbols() const {
+  return _symbols;
+}
+
+const std::vector<object::RelocationRef> &Sprinkles::getRelocs() const {
+  return _relocations;
+}
+
 Error Sprinkles::initialize() { return parseObject(); }
 
 const InstList Sprinkles::getInstructions(const object::SymbolRef &sr) const {
@@ -132,6 +140,10 @@ Error Sprinkles::parseObject() {
       _relocations.push_back(rr);
 
   return Error::success();
+}
+
+const MCInstrDesc &Sprinkles::getDesc(const MCInst &mi) const {
+  return _iinfo->get(mi.getOpcode());
 }
 
 MCInstPrinter *Sprinkles::getPrinter() const { return _printer.get(); }

@@ -41,6 +41,23 @@ int main(int argc, char **argv) {
     llvm::json::OStream j(llvm::outs());
     j.object([&] {
       j.attribute("FileName", InputFilename);
+      j.attributeArray("Symbols", [&] {
+        for (const object::SymbolRef &sr : sdis.getSymbols()) {
+          j.object([&] {
+            if (auto name = sr.getName()) j.attribute("Name", *name);
+            if (auto addr = sr.getAddress()) j.attribute("Address", *addr);
+          });
+        }
+      });
+      j.attributeArray("Relocations", [&] {
+        for (const object::RelocationRef &rr : sdis.getRelocs()) {
+          j.object([&] {
+            auto s = rr.getSymbol();
+            if (auto n = s->getName()) j.attribute("Symbol", *n);
+            j.attribute("Offset", rr.getOffset());
+          });
+        }
+      });
       j.attributeArray("OpCodes", [&] {
         for (const MCInst &i : sdis.getInstructions()) {
           j.object([&] {
