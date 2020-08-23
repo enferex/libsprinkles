@@ -22,6 +22,7 @@ class Sprinkles final {
   std::vector<llvm::MCInst> _instructions;
   std::vector<llvm::object::SymbolRef> _symbols;
   std::vector<llvm::object::RelocationRef> _relocations;
+  std::vector<llvm::object::SectionRef> _sections;
   std::unique_ptr<llvm::object::ObjectFile> _objFile;
   std::unique_ptr<llvm::MemoryBuffer> _objBuffer;
   std::unique_ptr<llvm::MCInstPrinter> _printer;
@@ -45,6 +46,7 @@ class Sprinkles final {
   const InstList getInstructions(const llvm::object::SymbolRef &sr) const;
   const std::vector<llvm::object::SymbolRef> &getSymbols() const;
   const std::vector<llvm::object::RelocationRef> &getRelocs() const;
+  const std::vector<llvm::object::SectionRef> &getSections() const;
   const llvm::MCInstrDesc &getDesc(const llvm::MCInst &mi) const;
   llvm::MCInstPrinter *getPrinter() const;
   void dump(const llvm::MCInst *mi) const;

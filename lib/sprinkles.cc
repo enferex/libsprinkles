@@ -40,6 +40,10 @@ const std::vector<object::RelocationRef> &Sprinkles::getRelocs() const {
   return _relocations;
 }
 
+const std::vector<object::SectionRef> &Sprinkles::getSections() const {
+  return _sections;
+}
+
 Error Sprinkles::initialize() { return parseObject(); }
 
 const InstList Sprinkles::getInstructions(const object::SymbolRef &sr) const {
@@ -134,10 +138,13 @@ Error Sprinkles::parseObject() {
   for (const object::SymbolRef &sr : _objFile->symbols())
     _symbols.push_back(sr);
 
-  // Collect the relocations.
-  for (const object::SectionRef &sect : _objFile->dynamic_relocation_sections())
+  // Collect the sections and relocations.
+  for (const object::SectionRef &sect :
+       _objFile->dynamic_relocation_sections()) {
+    _sections.push_back(sect);
     for (const object::RelocationRef &rr : sect.relocations())
       _relocations.push_back(rr);
+  }
 
   return Error::success();
 }

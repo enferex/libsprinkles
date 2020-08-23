@@ -41,11 +41,20 @@ int main(int argc, char **argv) {
     llvm::json::OStream j(llvm::outs());
     j.object([&] {
       j.attribute("FileName", InputFilename);
+      j.attributeArray("Sections", [&] {
+        for (const object::SectionRef &s : sdis.getSections()) {
+          j.object([&] {
+            if (auto name = s.getName()) j.attribute("Name", *name);
+            j.attribute("Address", s.getAddress());
+          });
+        }
+      });
       j.attributeArray("Symbols", [&] {
         for (const object::SymbolRef &sr : sdis.getSymbols()) {
           j.object([&] {
             if (auto name = sr.getName()) j.attribute("Name", *name);
             if (auto addr = sr.getAddress()) j.attribute("Address", *addr);
+            j.attribute("Value", sr.getValue());
           });
         }
       });
