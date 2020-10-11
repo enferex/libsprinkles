@@ -29,8 +29,8 @@ int main(int argc, char **argv) {
   }
   auto printer = sdis.getPrinter();
   if (Dump)
-    for (const MCInst &i : sdis.getInstructions()) {
-      sdis.dump(&i);
+    for (const auto Pr : sdis.getInstructions()) {
+      sdis.dump(&Pr.second);
       llvm::outs() << '\n';
     }
   else {
@@ -64,14 +64,17 @@ int main(int argc, char **argv) {
             auto s = rr.getSymbol();
             if (auto n = s->getName()) j.attribute("Symbol", *n);
             j.attribute("Offset", rr.getOffset());
+            j.attribute("Type", rr.getType());
           });
         }
       });
       j.attributeArray("OpCodes", [&] {
-        for (const MCInst &i : sdis.getInstructions()) {
+        for (const auto &pr : sdis.getInstructions()) {
           j.object([&] {
+            const MCInst &i = pr.second;
             j.attribute("Name", printer->getOpcodeName(i.getOpcode()));
             j.attribute("OpCode", i.getOpcode());
+            j.attribute("Address", pr.first);
             j.attributeArray("Operands", [&] {
               for (const auto &opnd : i) {
                 sdata.clear();

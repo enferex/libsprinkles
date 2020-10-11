@@ -28,9 +28,7 @@ Sprinkles::Sprinkles(const char *fname) : _inputFname(fname) {
   }
 }
 
-const std::vector<MCInst> &Sprinkles::getInstructions() const {
-  return _instructions;
-}
+const InstList &Sprinkles::getInstructions() const { return _instructions; }
 
 const std::vector<object::SymbolRef> &Sprinkles::getSymbols() const {
   return _symbols;
@@ -117,7 +115,7 @@ Error Sprinkles::parseObject() {
           inst, size, bytes.slice(offset), base + offset, nulls());
       if (status == MCDisassembler::Success) {
         nAdded++;
-        _instructions.push_back(inst);
+        _instructions.push_back({base + offset, inst});
       }
       offset += (size == 0 ? 1 : size);
     }
@@ -139,8 +137,7 @@ Error Sprinkles::parseObject() {
     _symbols.push_back(sr);
 
   // Collect the sections and relocations.
-  for (const object::SectionRef &sect :
-       _objFile->dynamic_relocation_sections()) {
+  for (const object::SectionRef &sect : _objFile->sections()) {
     _sections.push_back(sect);
     for (const object::RelocationRef &rr : sect.relocations())
       _relocations.push_back(rr);

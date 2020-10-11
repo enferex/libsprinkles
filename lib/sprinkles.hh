@@ -15,11 +15,13 @@
 #include <vector>
 
 namespace sprinkles {
-using InstList = std::vector<llvm::MCInst>;  // TODO: Make this a list of ptrs
+
+// First: Instruction Address, Second: Instruction
+using InstList = std::vector<std::pair<uint64_t, llvm::MCInst>>;
 
 class Sprinkles final {
   std::string _inputFname;
-  std::vector<llvm::MCInst> _instructions;
+  std::vector<std::pair<uint64_t, llvm::MCInst>> _instructions;
   std::vector<llvm::object::SymbolRef> _symbols;
   std::vector<llvm::object::RelocationRef> _relocations;
   std::vector<llvm::object::SectionRef> _sections;
@@ -42,7 +44,7 @@ class Sprinkles final {
   Sprinkles(const char *fname);
   llvm::Error initialize();
   const llvm::object::ObjectFile *getObjectFile() const;
-  const std::vector<llvm::MCInst> &getInstructions() const;
+  const InstList &getInstructions() const;
   const InstList getInstructions(const llvm::object::SymbolRef &sr) const;
   const std::vector<llvm::object::SymbolRef> &getSymbols() const;
   const std::vector<llvm::object::RelocationRef> &getRelocs() const;
