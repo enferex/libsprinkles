@@ -18,6 +18,8 @@ namespace sprinkles {
 
 // First: Instruction Address, Second: Instruction
 using InstList = std::vector<std::pair<uint64_t, llvm::MCInst>>;
+using InstListIter =
+    std::vector<std::pair<uint64_t, llvm::MCInst>>::const_iterator;
 
 class Sprinkles final {
   std::string _inputFname;
@@ -49,6 +51,8 @@ class Sprinkles final {
   const std::vector<llvm::object::SymbolRef> &getSymbols() const;
   const std::vector<llvm::object::RelocationRef> &getRelocs() const;
   const std::vector<llvm::object::SectionRef> &getSections() const;
+  const llvm::Expected<llvm::object::SectionRef> getSection(
+      llvm::StringRef sectionName) const;
   const llvm::MCInstrDesc &getDesc(const llvm::MCInst &mi) const;
   llvm::MCInstPrinter *getPrinter() const;
   void dump(const llvm::MCInst *mi) const;

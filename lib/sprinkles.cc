@@ -7,12 +7,12 @@
 #include <llvm/MC/MCObjectFileInfo.h>
 #include <llvm/MC/MCTargetOptions.h>
 #include <llvm/Object/ObjectFile.h>
+#include <llvm/Support/Error.h>
 #include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/TargetSelect.h>
 
 #include <algorithm>
 #include <cassert>
-#include <llvm/CodeGen/CommandFlags.inc>
 using namespace llvm;
 using namespace sprinkles;
 
@@ -28,6 +28,8 @@ Sprinkles::Sprinkles(const char *fname) : _inputFname(fname) {
   }
 }
 
+Error Sprinkles::initialize() { return parseObject(); }
+
 const InstList &Sprinkles::getInstructions() const { return _instructions; }
 
 const std::vector<object::SymbolRef> &Sprinkles::getSymbols() const {
@@ -42,8 +44,6 @@ const std::vector<object::SectionRef> &Sprinkles::getSections() const {
   return _sections;
 }
 
-Error Sprinkles::initialize() { return parseObject(); }
-
 const InstList Sprinkles::getInstructions(const object::SymbolRef &sr) const {
   auto typeOrErr = sr.getType();
   if (!typeOrErr) return {};
@@ -57,6 +57,17 @@ const InstList Sprinkles::getInstructions(const object::SymbolRef &sr) const {
   auto pr = _sectionToInsns.find(sect.getIndex());
   if (pr == _sectionToInsns.end()) return {};
   return InstList(pr->second.first, pr->second.second);
+}
+
+const Expected<object::SectionRef> Sprinkles::getSection(
+    StringRef sectionName) const {
+  const auto obj = getObjectFile();
+  assert(obj && "Failed to acquire objec file instance.");
+  for (const auto &section : obj->sections())
+    if (auto maybeName = section.getName())
+      if (maybeName->equals(sectionName)) return section;
+  return llvm::createStringError(llvm::inconvertibleErrorCode(),
+                                 "Failed to locate section.");
 }
 
 const object::ObjectFile *Sprinkles::getObjectFile() const {
@@ -75,7 +86,7 @@ Error Sprinkles::parseObject() {
   // Special thanks for llvm-objdump for outlining this process.
   Triple triple = _objFile->makeTriple();
   std::string err;
-  const Target *target = TargetRegistry::lookupTarget(MArch, triple, err);
+  const Target *target = TargetRegistry::lookupTarget(triple.str(), err);
   if (!target) {
     return make_error<StringError>(
         "Error identifying the target for the input object file: " + err + '\n',

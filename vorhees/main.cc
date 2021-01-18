@@ -22,6 +22,8 @@ int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv, "vorhees: Disassembly to JSON.");
   InitLLVM(argc, argv);
 
+  const object::SymbolRef emptySym;
+
   sprinkles::Sprinkles sdis(InputFilename.c_str());
   if (auto err = sdis.initialize()) {
     llvm::errs() << err;
@@ -54,7 +56,7 @@ int main(int argc, char **argv) {
           j.object([&] {
             if (auto name = sr.getName()) j.attribute("Name", *name);
             if (auto addr = sr.getAddress()) j.attribute("Address", *addr);
-            j.attribute("Value", sr.getValue());
+            if (auto val = sr.getValue()) j.attribute("Value", *val);
           });
         }
       });
@@ -62,9 +64,11 @@ int main(int argc, char **argv) {
         for (const object::RelocationRef &rr : sdis.getRelocs()) {
           j.object([&] {
             auto s = rr.getSymbol();
-            if (auto n = s->getName()) j.attribute("Symbol", *n);
-            j.attribute("Offset", rr.getOffset());
-            j.attribute("Type", rr.getType());
+            if (s != emptySym) {
+              if (auto n = s->getName()) j.attribute("Symbol", *n);
+              j.attribute("Offset", rr.getOffset());
+              j.attribute("Type", rr.getType());
+            }
           });
         }
       });
