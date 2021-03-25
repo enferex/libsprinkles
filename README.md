@@ -1,5 +1,5 @@
-libsprinkles: LLVM-driven disassembly library
-=============================================
+libsprinkles: Simple disassembly library.
+=========================================
 *This project is alpha (which is my excuse if something doesn't
 function accurately or correctly).*
 
